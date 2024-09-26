@@ -1,41 +1,48 @@
-var createError = require('http-errors');
+// Import necessary modules
 var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 
-var indexRouter = require('./app_server/routes/index');
-var usersRouter = require('./app_server/routes/users');
-
+// Create the express app
 var app = express();
 
-// view engine setup
-app.set('views', path.join(__dirname,'app_server' ,'views'));
-app.set('view engine', 'jade');
-
+// Middleware
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/', indexRouter);
-app.use('/users', usersRouter);
+// Import the weather route
+var weatherRouter = require('./app_server/routes/index');  // Adjust path if necessary
 
-// catch 404 and forward to error handler
-app.use(function(req, res, next) {
-  next(createError(404));
+// Use the weather route under /api
+app.use('/api', weatherRouter);  // This line adds the /api route for weather
+
+// Route for the root URL (/)
+app.get('/', function(req, res) {
+  res.send('Welcome to the Weather App!');  // Customize this as needed
 });
 
-// error handler
+// Route for favicon
+app.get('/favicon.ico', (req, res) => res.sendFile(path.join(__dirname, 'public', 'favicon.ico')));
+
+// Catch 404 and forward to error handler
+app.use(function(req, res, next) {
+  const err = new Error('Not Found');
+  err.status = 404;
+  next(err);
+});
+
+// Error handler
 app.use(function(err, req, res, next) {
-  // set locals, only providing error in development
   res.locals.message = err.message;
   res.locals.error = req.app.get('env') === 'development' ? err : {};
 
-  // render the error page
   res.status(err.status || 500);
-  res.render('error');
+  res.json({ error: err.message });
 });
 
+// Export the app for use in bin/www
 module.exports = app;

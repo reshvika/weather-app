@@ -3,36 +3,62 @@
 /**
  * Module dependencies.
  */
-
 var app = require('../app');
-var debug = require('debug')('loc8r:server');
+var debug = require('debug')('locator:server');
 var http = require('http');
+var axios = require('axios');  // Include axios to fetch weather data
 
 /**
  * Get port from environment and store in Express.
  */
-
 var port = normalizePort(process.env.PORT || '3000');
 app.set('port', port);
 
 /**
  * Create HTTP server.
  */
-
 var server = http.createServer(app);
 
 /**
  * Listen on provided port, on all network interfaces.
  */
-
 server.listen(port);
 server.on('error', onError);
 server.on('listening', onListening);
 
 /**
+ * Fetch weather data when the server starts
+ */
+async function fetchWeather() {
+  try {
+    const city = 'New York';  // Change to any default city or pass dynamically
+    const apiKey = 'a974877ab53124d762447e65bb275dee';  // Replace with your OpenWeatherMap API key
+    const apiUrl = `http://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=metric`;
+
+    const response = await axios.get(apiUrl);
+    const weatherData = response.data;
+
+    const temperature = weatherData.main.temp;
+    const humidity = weatherData.main.humidity;
+    const weatherDescription = weatherData.weather[0].description;
+
+    console.log(`Current weather in ${city}:`);
+    console.log(`Temperature: ${temperature}°C`);
+    console.log(`Humidity: ${humidity}%`);
+    console.log(`Description: ${weatherDescription}`);
+  } catch (error) {
+    console.error('Error fetching weather data:', error.message);
+  }
+}
+
+/**
+ * Call the fetchWeather function when server is listening
+ */
+fetchWeather();  // Fetch weather data on startup
+
+/**
  * Normalize a port into a number, string, or false.
  */
-
 function normalizePort(val) {
   var port = parseInt(val, 10);
 
@@ -52,15 +78,12 @@ function normalizePort(val) {
 /**
  * Event listener for HTTP server "error" event.
  */
-
 function onError(error) {
   if (error.syscall !== 'listen') {
     throw error;
   }
 
-  var bind = typeof port === 'string'
-    ? 'Pipe ' + port
-    : 'Port ' + port;
+  var bind = typeof port === 'string' ? 'Pipe ' + port : 'Port ' + port;
 
   // handle specific listen errors with friendly messages
   switch (error.code) {
@@ -80,11 +103,9 @@ function onError(error) {
 /**
  * Event listener for HTTP server "listening" event.
  */
-
 function onListening() {
   var addr = server.address();
-  var bind = typeof addr === 'string'
-    ? 'pipe ' + addr
-    : 'port ' + addr.port;
+  var bind = typeof addr === 'string' ? 'pipe ' + addr : 'port ' + addr.port;
   debug('Listening on ' + bind);
+  console.log(`Server is listening on ${bind}`);
 }
