@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather App</title>
+    <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400&family=Montserrat:wght@700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background-color: #87CEEB;
+            background-image: url('https://www.transparenttextures.com/patterns/clouds.png');
+            background-size: cover;
+            font-family: 'Lora', serif;
+            color: #333;
+        }
+        .nav {
+            text-align: center;
+            margin: 20px 0;
+        }
+        .nav a {
+            margin: 0 15px;
+            text-decoration: none;
+            color: #FF6F61;
+            font-weight: bold;
+            font-family: 'Montserrat', sans-serif;
+        }
+        .weather-card {
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            width: 300px;
+            margin: auto;
+            text-align: center;
+        }
+        input[type="text"] {
+            width: 70%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 2px solid #FF6F61;
+            border-radius: 25px;
+        }
+        button {
+            padding: 10px;
+            background-color: #FF6F61;
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="nav">
+        <a href="about.html">About</a>
+        <a href="signin.html">Sign In</a>
+    </div>
+
+    <div class="weather-card">
+        <h1>Weather App</h1>
+        <input type="text" id="cityInput" placeholder="Enter city name" />
+        <button onclick="getWeather()">Get Weather</button>
+        <div id="weatherResult" style="margin-top: 20px;"></div>
+    </div>
+
+    <script>
+        function getWeather() {
+            const city = document.getElementById('cityInput').value;
+            fetch(`/api/weather?city=${city}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        document.getElementById('weatherResult').innerHTML = `<p>${data.error}</p>`;
+                    } else {
+                        document.getElementById('weatherResult').innerHTML = `
+                            <p>City: ${data.name}</p>
+                            <p>Temperature: ${data.main.temp}°C</p>
+                            <p>Humidity: ${data.main.humidity}%</p>
+                            <p>Description: ${data.weather[0].description}</p>
+                        `;
+                    }
+                })
+                .catch(error => {
+                    document.getElementById('weatherResult').innerHTML = `<p>Error fetching weather data.</p>`;
+                });
+        }
+    </script>
+</body>
+</html>
